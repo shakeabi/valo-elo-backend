@@ -16,13 +16,13 @@ Array.prototype.clean = function(deleteValue) {
 const retrieveCompData = async (history)=> {
   obj = await getRank();
 
-  let out = calcContent(history);
+  let out = calcContentV2(history);
 
   out["rankText"] = obj.Ranks[out["rankNumber"]];
   return out;
 }
 
-const calcContent = (history)=>{
+const calcContentV2 = (history)=>{
   let points = []
   let count = 0;
   let i = 0;
@@ -32,41 +32,19 @@ const calcContent = (history)=>{
   for (; i<history.length; ++i)
   {   
       const game = history[i];
-      if (game["CompetitiveMovement"] == "MOVEMENT_UNKNOWN")
+      if (game["CompetitiveMovement"] != "MOVEMENT_UNKNOWN")
       {
-          // not a ranked game
-      }
-      else if (game["CompetitiveMovement"] == "PROMOTED")
-      {
-          // player promoted
           let before = game["TierProgressBeforeUpdate"];
           let after = game["TierProgressAfterUpdate"];
-          let differ = (after - before) + 100; // positive num
+          let afterRankNumber = game["TierAfterUpdate"];
+          let beforeRankNumber = game["TierBeforeUpdate"];
+          let differ = calcNetELO(afterRankNumber, after) - calcNetELO(beforeRankNumber, before);
           points[i] = {diff: differ, timestamp: game["MatchStartTime"]};
           count++;
-
-          if(currRP==-100){currRP=game["TierProgressAfterUpdate"];rankNumber=game["TierAfterUpdate"]}
-      }
-      else if (game["CompetitiveMovement"] == "DEMOTED")
-      {
-          // player demoted
-          let before = game["TierProgressBeforeUpdate"];
-          let after = game["TierProgressAfterUpdate"];
-          let differ = (after - before) - 100; // negative num
-          points[i] = {diff: differ, timestamp:game["MatchStartTime"]};
-          count++;
-
-          if(currRP==-100){currRP=game["TierProgressAfterUpdate"];rankNumber=game["TierAfterUpdate"]}
-      }
-      else
-      {
-          let before = game["TierProgressBeforeUpdate"];
-          let after = game["TierProgressAfterUpdate"];
-          let differ = after-before;
-          points[i] = {diff: differ, timestamp: game["MatchStartTime"]};
-          count++;
-
-          if(currRP==-100){currRP=game["TierProgressAfterUpdate"];rankNumber=game["TierAfterUpdate"]}
+          if(currRP==-100){
+            currRP=game["TierProgressAfterUpdate"];
+            rankNumber=game["TierAfterUpdate"];
+          }
       }
 
       if (count >= 5) // 5 recent matches found
@@ -74,15 +52,80 @@ const calcContent = (history)=>{
   }
 
   points.clean(undefined);
-  
   const data = {
     delta: points,
     currRP,
     rankNumber,
-    net: (rankNumber * 100) - 300 + currRP
+    net: calcNetELO(rankNumber, currRP)
   };
   return data;
 }
+
+const calcNetELO = (rankNumber, currRP) => {
+  return ((rankNumber * 100) - 300 + currRP);
+}
+
+// const calcContent = (history)=>{
+//   let points = []
+//   let count = 0;
+//   let i = 0;
+//   let currRP = -100;
+//   let rankNumber = -1;
+  
+//   for (; i<history.length; ++i)
+//   {   
+//       const game = history[i];
+//       if (game["CompetitiveMovement"] == "MOVEMENT_UNKNOWN")
+//       {
+//           // not a ranked game
+//       }
+//       else if (game["CompetitiveMovement"] == "PROMOTED")
+//       {
+//           // player promoted
+//           let before = game["TierProgressBeforeUpdate"];
+//           let after = game["TierProgressAfterUpdate"];
+//           let differ = (after - before) + 100; // positive num
+//           points[i] = {diff: differ, timestamp: game["MatchStartTime"]};
+//           count++;
+
+//           if(currRP==-100){currRP=game["TierProgressAfterUpdate"];rankNumber=game["TierAfterUpdate"]}
+//       }
+//       else if (game["CompetitiveMovement"] == "DEMOTED")
+//       {
+//           // player demoted
+//           let before = game["TierProgressBeforeUpdate"];
+//           let after = game["TierProgressAfterUpdate"];
+//           let differ = (after - before) - 100; // negative num
+//           points[i] = {diff: differ, timestamp:game["MatchStartTime"]};
+//           count++;
+
+//           if(currRP==-100){currRP=game["TierProgressAfterUpdate"];rankNumber=game["TierAfterUpdate"]}
+//       }
+//       else
+//       {
+//           let before = game["TierProgressBeforeUpdate"];
+//           let after = game["TierProgressAfterUpdate"];
+//           let differ = after-before;
+//           points[i] = {diff: differ, timestamp: game["MatchStartTime"]};
+//           count++;
+
+//           if(currRP==-100){currRP=game["TierProgressAfterUpdate"];rankNumber=game["TierAfterUpdate"]}
+//       }
+
+//       if (count >= 5) // 5 recent matches found
+//           break;
+//   }
+
+//   points.clean(undefined);
+  
+//   const data = {
+//     delta: points,
+//     currRP,
+//     rankNumber,
+//     net: (rankNumber * 100) - 300 + currRP
+//   };
+//   return data;
+// }
 
 const getRank = async()=>{
   let obj = {
