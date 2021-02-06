@@ -386,7 +386,7 @@ class Client {
       this.debugger.debug(`${m.MATCH_COMPHISTORY_SUCCESS} ${m.MATCH_COMPHISTORY_PARSE}`, "request", this.debug);
       const res = await new CompParser(this.debugger, this.debug).parse(history);
       this.debugger.debug(m.MATCH_COMPHISTORY_PARSESUCCESS, "request", this.debug);
-       console.log(res);
+      // console.log(res);
       return res;
 
      } catch(err) {
