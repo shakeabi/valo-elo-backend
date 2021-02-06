@@ -378,7 +378,8 @@ class Client {
         url: `${this.Endpoints.BASE}/mmr/v1/players/${this.account.id}/competitiveupdates?startIndex=${start || 0}&endIndex=${end || 10}`,
         headers: {
          "Authorization":this.Authorization.fullToken,
-         "X-Riot-Entitlements-JWT":this.Authorization.RSOToken
+         "X-Riot-Entitlements-JWT":this.Authorization.RSOToken,
+         "X-Riot-ClientPlatform":"ew0KCSJwbGF0Zm9ybVR5cGUiOiAiUEMiLA0KCSJwbGF0Zm9ybU9TIjogIldpbmRvd3MiLA0KCSJwbGF0Zm9ybU9TVmVyc2lvbiI6ICIxMC4wLjE5MDQyLjEuMjU2LjY0Yml0IiwNCgkicGxhdGZvcm1DaGlwc2V0IjogIlVua25vd24iDQp9"
         }
       })).data;
 
