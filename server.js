@@ -32,17 +32,17 @@ const calcContentV2 = (history)=>{
   for (; i<history.length; ++i)
   {   
       const game = history[i];
-      if (game["CompetitiveMovement"] != "MOVEMENT_UNKNOWN")
+      if (game["TierAfterUpdate"] != "0")
       {
-          let before = game["TierProgressBeforeUpdate"];
-          let after = game["TierProgressAfterUpdate"];
+          let before = game["RankedRatingBeforeUpdate"];
+          let after = game["RankedRatingAfterUpdate"];
           let afterRankNumber = game["TierAfterUpdate"];
           let beforeRankNumber = game["TierBeforeUpdate"];
           let differ = calcNetELO(afterRankNumber, after) - calcNetELO(beforeRankNumber, before);
           points[i] = {diff: differ, timestamp: game["MatchStartTime"]};
           count++;
           if(currRP==-100){
-            currRP=game["TierProgressAfterUpdate"];
+            currRP=game["RankedRatingAfterUpdate"];
             rankNumber=game["TierAfterUpdate"];
           }
       }
